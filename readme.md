@@ -1,74 +1,182 @@
-<p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
+# Condominium Manager
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+[![CI](https://github.com/Stefanyvl2210/condominium-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/Stefanyvl2210/condominium-manager/actions/workflows/ci.yml)
+![PHP 8.3](https://img.shields.io/badge/PHP-8.3-777BB4)
+![Laravel 13](https://img.shields.io/badge/Laravel-13-FF2D20)
+![Filament 5](https://img.shields.io/badge/Filament-5-FDAE4B)
 
-## About Laravel
+Back office and owner portal for a residential condominium. It turns the monthly
+expenses of the buildings into one statement per unit, split by ownership share,
+and lets owners pay in US dollars or Venezuelan bolívares.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![Back-office dashboard](docs/screenshots/admin-dashboard.png)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Highlights
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Billing by ownership share.** Closing a month splits every approved expense
+  across the units: condominium-wide expenses by ownership share, building
+  expenses among that building's units only, and unit charges in full. The
+  reserve fund is added on top, and the split never loses or invents a cent.
+- **Dual currency.** Statements are issued in USD. Bolívar payments are
+  converted with the official exchange rate of the payment date, and every
+  statement shows the balance in both currencies.
+- **Payments with proof.** Owners report a transfer with a screenshot from the
+  portal; the administrator approves it and the money is applied to the oldest
+  statement first. Overpayments stay as credit for the next statement.
+- **Board approval.** Expenses above a configurable threshold wait for a board
+  member's sign-off. The administrator who records an expense cannot approve it.
+- **Late fees and aging.** A scheduled command charges the late fee once on
+  overdue statements. The aging report groups debt into 1–30, 31–60, 61–90 and
+  90+ days.
+- **Two Filament panels.** `/admin` for administrators and board members,
+  `/portal` for owners, with policies and query scoping so owners only ever see
+  their own units.
+- **PDF statements, email and in-app notifications**, and a notice board.
 
-## Learning Laravel
+## Try it
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Run the project locally (below) with `APP_DEMO=true` and use the one-click
+sign-in buttons on the home page or on either login screen.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Role | Email | Can |
+|---|---|---|
+| Administrator | `admin@example.com` | Manage units, owners, vendors, expenses, billing periods and payments |
+| Board member | `board@example.com` | See everything, approve or reject large expenses. Also owns unit A-0101 |
+| Owner | `owner@example.com` | See their statements, download PDFs, report payments, read notices |
 
-## Laravel Sponsors
+All demo accounts use the password `password`. The seeder builds six months of
+history: 2 towers, 50 units, daily exchange rates, about 270 payments, some
+late payers, five payments waiting for review and two expenses waiting for the
+board.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## Screenshots
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-- [We Are The Robots Inc.](https://watr.mx/)
-- [Understand.io](https://www.understand.io/)
-- [Abdel Elrafa](https://abdelelrafa.com)
-- [Hyper Host](https://hyper.host)
-- [Appoly](https://www.appoly.co.uk)
-- [OP.GG](https://op.gg)
+| | |
+|---|---|
+| ![Statement](docs/screenshots/statement.png) | ![Payment with proof](docs/screenshots/payment-proof.png) |
+| **Statement** with each expense and the unit's share | **Payment review** with the owner's receipt |
+| ![Aging report](docs/screenshots/aging-report.png) | ![Billing periods](docs/screenshots/billing-periods.png) |
+| **Accounts receivable aging** | **Billing periods** and collection rate |
+| ![Owner portal](docs/screenshots/portal-dashboard.png) | ![Report a payment](docs/screenshots/portal-report-payment.png) |
+| **Owner portal** | **Reporting a payment in bolívares** with live conversion |
 
-## Contributing
+## How a month is billed
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```mermaid
+flowchart LR
+    A[Admin records expense] --> B{Amount ≥ threshold?}
+    B -- no --> C[Approved]
+    B -- yes --> D[Board reviews] --> C
+    C --> E[Admin closes the month]
+    E --> F[One statement per unit<br/>+ reserve fund]
+    F --> G[Owner reports payment<br/>USD or VES + proof]
+    G --> H[Admin approves]
+    H --> I[Applied to oldest statement]
+    F -. past due date .-> J[Late fee job]
+```
 
-## Security Vulnerabilities
+For a unit with a 2 % share in Tower A, a month with $1,000 of
+condominium expenses and $200 of Tower A elevator maintenance (Tower A holds
+48 % of the condominium) produces:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Line | Amount |
+|---|---|
+| Condominium expenses: 2 % of $1,000 | $20.00 |
+| Tower A expenses: 2 / 48 of $200 | $8.33 |
+| Reserve fund: 10 % of $28.33 | $2.83 |
+| **Total** | **$31.16** |
 
-## License
+Business rules live in plain PHP classes under `app/Actions`, so they are tested
+without the UI:
 
-The Laravel framework is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Rule | Where |
+|---|---|
+| Split cents with the largest remainder method | `app/Support/ShareAllocator.php` |
+| Close a billing period and issue statements | `app/Actions/Billing/CloseBillingPeriod.php` |
+| Charge late fees | `app/Actions/Billing/ApplyLateFees.php` |
+| Convert and record a payment | `app/Actions/Payments/SubmitPayment.php` |
+| Approve or reject a payment | `app/Actions/Payments/ReviewPayment.php` |
+| Apply credit to the oldest statements | `app/Actions/Payments/ApplyUnitCredit.php` |
+| Route large expenses to the board | `app/Actions/Expenses/RecordExpense.php` |
+
+## Data model
+
+```mermaid
+erDiagram
+    BUILDING ||--o{ UNIT : has
+    USER ||--o{ UNIT : owns
+    UNIT ||--o{ INVOICE : "is billed"
+    UNIT ||--o{ PAYMENT : "pays"
+    BILLING_PERIOD ||--o{ INVOICE : issues
+    BILLING_PERIOD ||--o{ EXPENSE : bills
+    INVOICE ||--o{ INVOICE_LINE : contains
+    EXPENSE ||--o{ INVOICE_LINE : "is split into"
+    PAYMENT ||--o{ PAYMENT_ALLOCATION : "is applied as"
+    INVOICE ||--o{ PAYMENT_ALLOCATION : receives
+    VENDOR ||--o{ EXPENSE : invoices
+    EXPENSE_CATEGORY ||--o{ EXPENSE : groups
+```
+
+`condominiums` holds the settings (reserve fund, late fee, payment term, approval
+threshold), `exchange_rates` the daily VES/USD rate and `announcements` the
+notice board.
+
+## Technical decisions
+
+- **Money is stored as integer cents.** Splitting, percentages and currency
+  conversion use integer arithmetic with explicit rounding (`app/Support/Money.php`).
+- **Billing history is immutable.** Statements are generated, never edited; a
+  billed expense can no longer change. Corrections go into the next period.
+- **Actions instead of fat models or controllers.** Filament pages call the same
+  actions as the tests and the seeder.
+- **Authorization in policies.** Board members are read-only except for expense
+  review; owners are limited by both policies and per-panel query scoping.
+- **Realistic demo data.** The seeder replays the real actions while travelling
+  through time, so the demo data follows the same rules as production data.
+
+## Running locally
+
+Requirements: PHP 8.3 with `intl`, `gd`, `zip` and `pdo_mysql`, Composer,
+Node 20+ and MySQL 8. [Laragon](https://laragon.org) on Windows covers all of
+them.
+
+```bash
+git clone git@github.com:Stefanyvl2210/condominium-manager.git
+cd condominium-manager
+cp .env.example .env            # set DB_* for your MySQL server
+mysql -uroot -e "CREATE DATABASE condominium"
+composer setup                  # installs, migrates, seeds and builds assets
+php artisan serve
+```
+
+Open <http://localhost:8000>. Re-seed the demo at any time with
+`php artisan migrate:fresh --seed`.
+
+Useful commands:
+
+| Command | What it does |
+|---|---|
+| `composer check` | Pint, Larastan and the test suite |
+| `composer test` | Pest tests (SQLite in memory) |
+| `php artisan billing:apply-late-fees` | Charge late fees on overdue statements (scheduled daily) |
+| `php artisan schedule:work` | Run the scheduler locally |
+
+Emails go to the log by default (`MAIL_MAILER=log`). Set `APP_DEMO=false` on any
+site that holds real data.
+
+## Tests and quality
+
+- **Pest**: 96 tests covering the billing rules, payments, late fees,
+  permissions per role, data isolation between owners and the Filament pages.
+- **Larastan** at level 6 and **Pint**, enforced in GitHub Actions.
+
+## Tech stack
+
+Laravel 13 · Filament 5 (Livewire 4) · PHP 8.3 · MySQL 8 · Tailwind CSS 4 ·
+Pest 4 · Larastan · DomPDF
+
+## History
+
+The first version was written in 2019 with Laravel 6. It was rebuilt in 2026 on
+the current stack, keeping the original domain: units, monthly charges, vendors
+and their payments.
