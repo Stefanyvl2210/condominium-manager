@@ -58,7 +58,7 @@ it('hides other owners\' statements and PDFs', function () {
 });
 
 it('lets an owner report a bolívar payment with proof', function () {
-    Storage::fake('local');
+    Storage::fake('uploads');
     Notification::fake();
     ExchangeRate::factory()->create(['effective_on' => '2026-10-01', 'rate' => '50.0000']);
     User::factory()->admin()->create();
@@ -86,7 +86,7 @@ it('lets an owner report a bolívar payment with proof', function () {
         ->submitted_by->toBe($this->owner->id)
         ->and($payment->proof_path)->not->toBeNull();
 
-    Storage::disk('local')->assertExists($payment->proof_path);
+    Storage::disk('uploads')->assertExists($payment->proof_path);
 });
 
 it('requires proof of payment from owners', function () {
@@ -104,7 +104,7 @@ it('requires proof of payment from owners', function () {
 });
 
 it('rejects payments for units the owner does not own', function () {
-    Storage::fake('local');
+    Storage::fake('uploads');
 
     livewire(CreatePayment::class)
         ->fillForm([

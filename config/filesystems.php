@@ -38,6 +38,18 @@ return [
             'report' => false,
         ],
 
+        // Private files uploaded by users: expense invoices and proofs of
+        // payment. On Laravel Cloud, attach a private bucket with the disk
+        // name "uploads" and this local definition is replaced by the bucket.
+        'uploads' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/uploads'),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/uploads',
+            'serve' => true,
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

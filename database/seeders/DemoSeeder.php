@@ -443,7 +443,7 @@ class DemoSeeder extends Seeder
      */
     private function createRecentActivity(Carbon $today): void
     {
-        Storage::disk('local')->makeDirectory('payments');
+        Storage::disk('uploads')->makeDirectory('payments');
 
         $candidates = Invoice::query()
             ->outstanding()
@@ -510,7 +510,7 @@ class DemoSeeder extends Seeder
         imagedestroy($image);
 
         $path = "payments/demo-receipt-{$reference}.png";
-        Storage::disk('local')->put($path, $png);
+        Storage::disk('uploads')->put($path, $png);
 
         return $path;
     }

@@ -54,7 +54,7 @@ class ExpenseForm
                             ->maxLength(50),
                         FileUpload::make('attachment_path')
                             ->label('Invoice or receipt')
-                            ->disk('local')
+                            ->disk('uploads')
                             ->directory('expenses')
                             ->visibility('private')
                             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])

@@ -60,7 +60,7 @@ class PaymentInfolist
                             ->columnSpanFull(),
                         ImageEntry::make('proof_path')
                             ->label('Proof of payment')
-                            ->disk('local')
+                            ->disk('uploads')
                             ->visibility('private')
                             ->imageHeight(320)
                             ->visible(fn (Payment $record) => $record->proof_path && ! Str::endsWith($record->proof_path, '.pdf'))
@@ -68,7 +68,7 @@ class PaymentInfolist
                         TextEntry::make('proof_pdf')
                             ->label('Proof of payment')
                             ->state('Open PDF')
-                            ->url(fn (Payment $record) => Storage::disk('local')->temporaryUrl($record->proof_path, now()->addMinutes(15)))
+                            ->url(fn (Payment $record) => Storage::disk('uploads')->temporaryUrl($record->proof_path, now()->addMinutes(15)))
                             ->openUrlInNewTab()
                             ->visible(fn (Payment $record) => $record->proof_path && Str::endsWith($record->proof_path, '.pdf')),
                     ]),

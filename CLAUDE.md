@@ -29,6 +29,10 @@ in-memory for tests, Pest 4, Larastan (level 6), Pint, Tailwind 4 via Vite.
 - **Billing history is immutable.** Invoices are only created by
   `CloseBillingPeriod` and only changed by payment allocation and late fees.
   Billed expenses cannot be edited or deleted (`ExpensePolicy`).
+- **User uploads use the `uploads` disk**, never `local` or `public`. Locally it
+  points to `storage/app/private/uploads`; on Laravel Cloud a private bucket
+  named `uploads` replaces it. Generate links with `temporaryUrl()`. Deployment
+  details are in `docs/deployment.md`.
 - **Authorization goes in policies** (`app/Policies`). Board members are
   read-only except `ExpensePolicy::review`. Owner portal resources must scope
   `getEloquentQuery()` to the signed-in owner.

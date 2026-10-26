@@ -48,7 +48,7 @@ class ExpenseInfolist
                             ->label('Invoice or receipt')
                             ->formatStateUsing(fn () => 'Open file')
                             ->url(fn (Expense $record) => $record->attachment_path
-                                ? Storage::disk('local')->temporaryUrl($record->attachment_path, now()->addMinutes(15))
+                                ? Storage::disk('uploads')->temporaryUrl($record->attachment_path, now()->addMinutes(15))
                                 : null)
                             ->openUrlInNewTab()
                             ->placeholder('No file'),

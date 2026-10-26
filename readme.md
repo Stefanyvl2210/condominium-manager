@@ -159,10 +159,18 @@ Useful commands:
 | `composer check` | Pint, Larastan and the test suite |
 | `composer test` | Pest tests (SQLite in memory) |
 | `php artisan billing:apply-late-fees` | Charge late fees on overdue statements (scheduled daily) |
+| `php artisan demo:reset` | Wipe and re-seed the demo (only when `APP_DEMO=true`; scheduled nightly) |
 | `php artisan schedule:work` | Run the scheduler locally |
 
 Emails go to the log by default (`MAIL_MAILER=log`). Set `APP_DEMO=false` on any
 site that holds real data.
+
+## Deployment
+
+The demo is designed for [Laravel Cloud](https://cloud.laravel.com): compute and
+MySQL scale to zero, uploads go to a private bucket and the scheduler resets the
+demo every night. See [docs/deployment.md](docs/deployment.md) for the
+step-by-step setup.
 
 ## Tests and quality
 

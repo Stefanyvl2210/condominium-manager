@@ -84,7 +84,7 @@ class PaymentForm
                         FileUpload::make('proof_path')
                             ->label('Proof of payment')
                             ->helperText('Screenshot or PDF of the transfer receipt.')
-                            ->disk('local')
+                            ->disk('uploads')
                             ->directory('payments')
                             ->visibility('private')
                             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
