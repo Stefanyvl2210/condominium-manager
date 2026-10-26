@@ -5,6 +5,7 @@ use App\Enums\ExpenseStatus;
 use App\Enums\PaymentStatus;
 use App\Filament\Resources\BillingPeriods\Pages\ListBillingPeriods;
 use App\Filament\Resources\Expenses\Pages\CreateExpense;
+use App\Filament\Resources\Expenses\Pages\EditExpense;
 use App\Filament\Resources\Expenses\Pages\ListExpenses;
 use App\Filament\Resources\Payments\Pages\ListPayments;
 use App\Models\BillingPeriod;
@@ -113,4 +114,19 @@ it('does not let board members review payments', function () {
     $this->actingAs($this->board);
 
     livewire(ListPayments::class)->assertActionHidden(TestAction::make('approve')->table($payment));
+});
+
+it('sends an edited expense back to the board when it crosses the threshold', function () {
+    $expense = Expense::factory()->create(['amount' => 20_000]);
+
+    $this->actingAs($this->admin);
+
+    livewire(EditExpense::class, ['record' => $expense->getRouteKey()])
+        ->fillForm(['amount' => '2000.00'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($expense->fresh())
+        ->amount->toBe(200_000)
+        ->status->toBe(ExpenseStatus::PendingApproval);
 });

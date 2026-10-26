@@ -2,29 +2,35 @@
 
 namespace App\Filament\Resources\Expenses\Pages;
 
-use App\Enums\ExpenseScope;
+use App\Actions\Expenses\UpdateExpense;
 use App\Filament\Resources\Expenses\ExpenseResource;
+use App\Models\Expense;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @method Expense getRecord()
+ */
 class EditExpense extends EditRecord
 {
     protected static string $resource = ExpenseResource::class;
 
     /**
+     * @param  Expense  $record
      * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
      */
-    protected function mutateFormDataBeforeSave(array $data): array
+    protected function handleRecordUpdate(Model $record, array $data): Expense
     {
-        $scope = $data['scope'] instanceof ExpenseScope ? $data['scope'] : ExpenseScope::from($data['scope']);
+        return app(UpdateExpense::class)->handle($record, $data);
+    }
 
-        return [
-            ...$data,
-            'building_id' => $scope === ExpenseScope::Building ? $data['building_id'] : null,
-            'unit_id' => $scope === ExpenseScope::Unit ? $data['unit_id'] : null,
-        ];
+    protected function getSavedNotificationTitle(): string
+    {
+        return $this->getRecord()->isPendingApproval()
+            ? 'Expense saved and sent to the board for approval'
+            : 'Expense saved';
     }
 
     protected function getHeaderActions(): array

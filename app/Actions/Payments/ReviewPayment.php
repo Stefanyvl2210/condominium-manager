@@ -20,7 +20,7 @@ class ReviewPayment
             $this->applyUnitCredit->handle($payment->unit);
         });
 
-        $payment->submitter?->notify(new PaymentReviewed($payment));
+        $this->notifySubmitter($payment);
 
         return $payment;
     }
@@ -29,9 +29,17 @@ class ReviewPayment
     {
         DB::transaction(fn () => $this->markReviewed($payment, $reviewer, PaymentStatus::Rejected, $reason));
 
-        $payment->submitter?->notify(new PaymentReviewed($payment));
+        $this->notifySubmitter($payment);
 
         return $payment;
+    }
+
+    /**
+     * The review is already saved; a failing email is reported instead of undoing it.
+     */
+    private function notifySubmitter(Payment $payment): void
+    {
+        rescue(fn () => $payment->submitter?->notify(new PaymentReviewed($payment)));
     }
 
     private function markReviewed(Payment $payment, User $reviewer, PaymentStatus $status, ?string $reason = null): void

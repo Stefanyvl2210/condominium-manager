@@ -2,8 +2,11 @@
 
 use App\Actions\Expenses\RecordExpense;
 use App\Actions\Expenses\ReviewExpense;
+use App\Actions\Expenses\UpdateExpense;
 use App\Enums\ExpenseScope;
 use App\Enums\ExpenseStatus;
+use App\Exceptions\BillingException;
+use App\Models\BillingPeriod;
 use App\Models\Building;
 use App\Models\ExpenseCategory;
 use App\Models\User;
@@ -58,3 +61,55 @@ it('only allows board members to review', function () {
     expect($this->board->can('review', $expense))->toBeTrue()
         ->and($this->admin->can('review', $expense))->toBeFalse();
 });
+
+it('sends an approved expense back to the board when it grows past the threshold', function () {
+    $expense = ($this->record)(50_000);
+
+    app(UpdateExpense::class)->handle($expense, ['amount' => 150_000, 'scope' => ExpenseScope::Condominium]);
+
+    expect($expense->fresh()->status)->toBe(ExpenseStatus::PendingApproval)
+        ->and($this->board->notifications()->count())->toBe(1);
+});
+
+it('requires a new approval when a signed-off expense changes', function () {
+    $expense = app(ReviewExpense::class)->approve(($this->record)(200_000), $this->board);
+
+    app(UpdateExpense::class)->handle($expense, [
+        'scope' => ExpenseScope::Condominium,
+        'description' => 'A different repair',
+    ]);
+
+    expect($expense->fresh())
+        ->status->toBe(ExpenseStatus::PendingApproval)
+        ->reviewed_by->toBeNull()
+        ->reviewed_at->toBeNull();
+});
+
+it('keeps the approval when only bookkeeping details change', function () {
+    $expense = app(ReviewExpense::class)->approve(($this->record)(200_000), $this->board);
+
+    app(UpdateExpense::class)->handle($expense, [
+        'scope' => ExpenseScope::Condominium,
+        'paid_on' => '2026-10-20',
+        'payment_reference' => 'TRX-1',
+    ]);
+
+    expect($expense->fresh())
+        ->status->toBe(ExpenseStatus::Approved)
+        ->reviewed_by->toBe($this->board->id);
+});
+
+it('approves a pending expense once it drops below the threshold', function () {
+    $expense = ($this->record)(200_000);
+
+    app(UpdateExpense::class)->handle($expense, ['amount' => 80_000, 'scope' => ExpenseScope::Condominium]);
+
+    expect($expense->fresh()->status)->toBe(ExpenseStatus::Approved);
+});
+
+it('refuses to change an expense that was already billed', function () {
+    $expense = ($this->record)(5_000);
+    $expense->update(['billing_period_id' => BillingPeriod::for(2026, 10)->id]);
+
+    app(UpdateExpense::class)->handle($expense, ['amount' => 6_000, 'scope' => ExpenseScope::Condominium]);
+})->throws(BillingException::class, 'can no longer change');

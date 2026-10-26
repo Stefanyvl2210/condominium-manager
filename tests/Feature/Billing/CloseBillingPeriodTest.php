@@ -11,9 +11,15 @@ use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
+use App\Models\Vendor;
 use App\Notifications\InvoiceIssued;
+use Illuminate\Notifications\ChannelManager;
+use Illuminate\Notifications\Events\NotificationSending;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Schema;
 
 beforeEach(function () {
     Notification::fake();
@@ -161,3 +167,32 @@ it('refuses to bill when ownership shares do not add up to 100 %', function () {
 
     ($this->close)();
 })->throws(BillingException::class, 'add up to 90.000000%');
+
+it('applies every advance credit even when an email fails', function () {
+    // Send notifications for real and make every attempt fail, like an SMTP outage.
+    Notification::swap(new ChannelManager(app()));
+    Event::listen(NotificationSending::class, fn () => throw new RuntimeException('SMTP is down'));
+    Exceptions::fake();
+
+    [, $prepaid] = unitsWithShares(['50', '50']);
+    Payment::factory()->for($prepaid)->approved()->usd(5_000)->create();
+    Expense::factory()->create(['amount' => 10_000, 'incurred_on' => '2026-09-01']);
+
+    ($this->close)();
+
+    expect($this->period->fresh()->isOpen())->toBeFalse()
+        ->and(Invoice::whereBelongsTo($prepaid)->sole()->paid_amount)->toBe(5_000);
+
+    Exceptions::assertReported(RuntimeException::class);
+});
+
+it('keeps long expense and vendor names on statement lines', function () {
+    unitsWithShares(['100']);
+    $vendor = Vendor::factory()->create(['name' => str_repeat('V', 255)]);
+    Expense::factory()->for($vendor)->create(['description' => str_repeat('E', 255), 'incurred_on' => '2026-09-01']);
+
+    ($this->close)();
+
+    expect(Schema::getColumnType('invoice_lines', 'description'))->toBe('text')
+        ->and(strlen(Invoice::sole()->lines->first()->description))->toBe(255 + 255 + 3);
+});

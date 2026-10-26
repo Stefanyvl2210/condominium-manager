@@ -110,15 +110,19 @@ class CloseBillingPeriod
                 'closed_by' => $closedBy->id,
             ]);
 
+            // Owners who paid in advance get their credit applied as part of the same
+            // transaction, so a closed period never leaves credit unapplied.
+            foreach ($invoices as $invoice) {
+                $this->applyUnitCredit->handle($invoice->unit);
+                $invoice->refresh();
+            }
+
             return $invoices;
         });
 
+        // Billing is already committed; a failing email must not stop the other owners' notices.
         foreach ($invoices as $invoice) {
-            // Owners who paid in advance get their credit applied right away.
-            $this->applyUnitCredit->handle($invoice->unit);
-            $invoice->refresh();
-
-            $invoice->unit->owner?->notify(new InvoiceIssued($invoice));
+            rescue(fn () => $invoice->unit->owner?->notify(new InvoiceIssued($invoice)));
         }
 
         return $invoices;

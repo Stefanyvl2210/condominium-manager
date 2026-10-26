@@ -50,6 +50,11 @@ class BillingException extends RuntimeException
         return new self('This payment has already been reviewed.');
     }
 
+    public static function expenseAlreadyBilled(): self
+    {
+        return new self('This expense is already part of issued statements and can no longer change.');
+    }
+
     public static function expenseAlreadyReviewed(): self
     {
         return new self('This expense has already been reviewed.');

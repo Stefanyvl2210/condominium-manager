@@ -33,7 +33,8 @@ return new class extends Migration
             $table->foreignIdFor(Invoice::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Expense::class)->nullable()->constrained()->nullOnDelete();
             $table->string('type');
-            $table->string('description');
+            // Expense description plus vendor name, each up to 255 characters.
+            $table->text('description');
             // Full amount of the source expense, shown next to the unit's portion.
             $table->unsignedBigInteger('expense_total')->nullable();
             $table->unsignedBigInteger('amount');
