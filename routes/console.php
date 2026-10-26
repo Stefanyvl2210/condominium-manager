@@ -1,18 +1,16 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
+use App\Actions\Billing\ApplyLateFees;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-/*
-|--------------------------------------------------------------------------
-| Console Routes
-|--------------------------------------------------------------------------
-|
-| This file is where you may define all of your Closure based console
-| commands. Each Closure is bound to a command instance allowing a
-| simple approach to interacting with each command's IO methods.
-|
-*/
+Artisan::command('billing:apply-late-fees', function (ApplyLateFees $applyLateFees) {
+    $count = $applyLateFees->handle();
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->describe('Display an inspiring quote');
+    $this->info("Late fees applied to {$count} overdue statements.");
+})->purpose('Charge the late fee on statements that are past their due date');
+
+Schedule::command('billing:apply-late-fees')->dailyAt('01:00');
+
+// The public demo starts fresh every night. The command refuses to run unless APP_DEMO=true.
+Schedule::command('demo:reset')->dailyAt('04:00')->when(fn () => config('app.demo'));
